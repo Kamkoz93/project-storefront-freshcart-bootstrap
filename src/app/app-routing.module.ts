@@ -10,7 +10,7 @@ import { StoreProductsComponentModule } from './components/store-products/store-
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'categories/:categoryId', component: CategoryProductsComponent },
-  { path: 'stores/:storeId', component: StoreProductsComponent }
+  { path: 'stores/:storeId', component: StoreProductsComponent },
 ];
 
 @NgModule({
@@ -18,8 +18,8 @@ const routes: Routes = [
     RouterModule.forRoot(routes),
     HomeComponentModule,
     CategoryProductsComponentModule,
-    StoreProductsComponentModule
+    StoreProductsComponentModule,
   ],
   exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
