@@ -13,8 +13,8 @@ export class CategoriesService {
     );
   }
 
-  getCategoryById(catId: string): Observable<ProductCategoryModel[]> {
-    return this._httpClient.get<ProductCategoryModel[]>(
+  getCategoryById(catId: string): Observable<ProductCategoryModel> {
+    return this._httpClient.get<ProductCategoryModel>(
       `https://6384fca14ce192ac60696c4b.mockapi.io/freshcart-categories/${catId}`
     );
   }
