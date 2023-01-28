@@ -9,9 +9,10 @@ import {
   BehaviorSubject,
   map,
   Observable,
+  of,
   shareReplay,
   switchMap,
-  take,
+  combineLatest,
   tap,
 } from 'rxjs';
 import { ProductModel } from 'src/app/models/product.model';
@@ -58,21 +59,6 @@ export class CategoryProductsComponent implements OnInit {
     this._categoryIdSubject$.next(id);
   }
 
-  readonly productsByCategory$: Observable<ProductModel[]> =
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
-            )
-          );
-      })
-    );
-
   ngOnInit() {
     this.pageParams$
       .pipe(
@@ -94,5 +80,56 @@ export class CategoryProductsComponent implements OnInit {
       }
     }
     return ratingOptions;
+  }
+
+  private _sortSubject: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'Featured'
+  );
+
+  public sortOrder$: Observable<string> = this._sortSubject.asObservable();
+
+  public sortOrderOptions$: Observable<string[]> = of([
+    'Featured',
+    'Price Low to High',
+    'Price High to Low',
+    'Avg. Rating',
+  ]);
+
+  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) => product.categoryId === queryParams['categoryId']
+              )
+            )
+          );
+      })
+    ),
+    this.sortOrder$,
+  ]).pipe(map(([products, order]) => this.sortProds(products, order)));
+
+  public sortProds(
+    products: ProductModel[],
+    sortOrder: string
+  ): ProductModel[] {
+    sortOrder === 'Price Low to High'
+      ? products.sort((a, b) => a.price - b.price)
+      : sortOrder === 'Price High to Low'
+      ? products.sort((a, b) => b.price - a.price)
+      : sortOrder === 'Featured'
+      ? products.sort((a, b) => b.featureValue - a.featureValue)
+      : sortOrder === 'Avg. Rating'
+      ? products.sort((a, b) => b.ratingValue - a.ratingValue)
+      : products;
+    return products;
+  }
+
+  sortProdsSubject(order: any): void {
+    console.log(order.value);
+    this._sortSubject.next(order.value);
   }
 }

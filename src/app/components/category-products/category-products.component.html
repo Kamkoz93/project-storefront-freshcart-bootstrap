@@ -18,9 +18,16 @@
                         <h3 class="mb-0">{{categoryDetails.name}}</h3>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <p class="mb-3 mb-md-0"><span _ngcontent-cmb-c19="" class="text-primary">{{products.length}}</span>
+                <div class="d-flex mb-5 mt-2 mt-lg-0 justify-content-between align-items-center">
+                    <p class=" mb-3 mb-md-0"><span _ngcontent-cmb-c19="" class="text-primary">{{products.length}}</span>
                         Products found</p>
+                    <div>
+                        <select class="form-select" (change)="sortProdsSubject($event.target)">
+                            <option *ngFor="let sortOpt of sortOrderOptions$ | async" [value]="sortOpt">
+                                {{sortOpt}}
+                            </option>
+                        </select>
+                    </div>
                 </div>
                 <div *ngFor="let item of products" class="col">
                     <div class="card flex-row align-items-center card-product mb-5">
