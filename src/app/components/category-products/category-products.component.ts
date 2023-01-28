@@ -90,8 +90,8 @@ export class CategoryProductsComponent implements OnInit {
 
   public sortOrderOptions$: Observable<string[]> = of([
     'Featured',
-    'Price Low to High',
-    'Price High to Low',
+    'Price: Low to High',
+    'Price: High to Low',
     'Avg. Rating',
   ]);
 
@@ -116,9 +116,9 @@ export class CategoryProductsComponent implements OnInit {
     products: ProductModel[],
     sortOrder: string
   ): ProductModel[] {
-    sortOrder === 'Price Low to High'
+    sortOrder === 'Price: Low to High'
       ? products.sort((a, b) => a.price - b.price)
-      : sortOrder === 'Price High to Low'
+      : sortOrder === 'Price: High to Low'
       ? products.sort((a, b) => b.price - a.price)
       : sortOrder === 'Featured'
       ? products.sort((a, b) => b.featureValue - a.featureValue)
@@ -129,7 +129,6 @@ export class CategoryProductsComponent implements OnInit {
   }
 
   sortProdsSubject(order: any): void {
-    console.log(order.value);
     this._sortSubject.next(order.value);
   }
 }
