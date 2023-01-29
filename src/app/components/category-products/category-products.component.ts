@@ -14,11 +14,14 @@ import {
   switchMap,
   combineLatest,
   tap,
+  take,
 } from 'rxjs';
+import { PaginationDataModel } from 'src/app/models/pagination-data.model';
 import { ProductModel } from 'src/app/models/product.model';
 import { ProductCategoryModel } from 'src/app/models/products-category.model';
 import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { MatSelectionListChange } from '@angular/material/list';
 
 @Component({
   selector: 'app-category-products',
@@ -95,23 +98,6 @@ export class CategoryProductsComponent implements OnInit {
     'Avg. Rating',
   ]);
 
-  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
-            )
-          );
-      })
-    ),
-    this.sortOrder$,
-  ]).pipe(map(([products, order]) => this.sortProds(products, order)));
-
   public sortProds(
     products: ProductModel[],
     sortOrder: string
@@ -130,5 +116,113 @@ export class CategoryProductsComponent implements OnInit {
 
   sortProdsSubject(order: any): void {
     this._sortSubject.next(order.value);
+  }
+
+  readonly pagination$: Observable<PaginationDataModel> =
+    this._activatedRoute.queryParams.pipe(
+      map((params) => ({
+        pageNumber: params['pageNumber'] ? +params['pageNumber'] : 1,
+        pageSize: params['pageSize'] ? +params['pageSize'] : 5,
+      })),
+      shareReplay(1)
+    );
+
+  readonly productsByCategoryInit$: Observable<ProductModel[]> =
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) => product.categoryId === queryParams['categoryId']
+              )
+            )
+          );
+      })
+    );
+
+  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) => product.categoryId === queryParams['categoryId']
+              )
+            )
+          );
+      })
+    ),
+    this.sortOrder$,
+    this.pagination$,
+  ]).pipe(
+    map(([products, order, pagination]) => {
+      this.sortProds(products, order);
+      return this.paginateData(products, pagination);
+    })
+  );
+
+  public paginateData(
+    products: ProductModel[],
+    pageData: PaginationDataModel
+  ): ProductModel[] {
+    return products.slice(
+      pageData.pageSize * (pageData.pageNumber - 1),
+      pageData.pageSize * pageData.pageNumber
+    );
+  }
+
+  readonly pages$: Observable<number[]> = combineLatest([
+    this.productsByCategoryInit$,
+    this.pagination$,
+  ]).pipe(
+    map(([products, params]) => {
+      let result = [];
+      for (
+        let i = 1;
+        i <= Math.ceil(products.length / params['pageSize']);
+        i++
+      ) {
+        result.push(i);
+      }
+      return result;
+    })
+  );
+
+  readonly pageSizeOptions$: Observable<number[]> = of([5, 10, 15]);
+
+  updatePageNum(pageNumber: number): void {
+    this.pagination$
+      .pipe(
+        take(1),
+        tap((params) =>
+          this._router.navigate([], {
+            queryParams: {
+              pageNumber: pageNumber,
+              pageSize: params['pageSize'],
+            },
+          })
+        )
+      )
+      .subscribe();
+    console.log(pageNumber);
+  }
+
+  updatePageSize(pageSize: number): void {
+    combineLatest([this.pagination$.pipe(take(1)), this.productsByCategory$])
+      .pipe(
+        tap(([params, products]) => {
+          this._router.navigate([], {
+            queryParams: {
+              pageNumber: Math.min(Math.ceil(products.length / pageSize)),
+              pageSize: pageSize,
+            },
+          });
+        })
+      )
+      .subscribe();
   }
 }
