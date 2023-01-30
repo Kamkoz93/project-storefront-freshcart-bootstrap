@@ -21,7 +21,6 @@ import { ProductModel } from 'src/app/models/product.model';
 import { ProductCategoryModel } from 'src/app/models/products-category.model';
 import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
-import { MatSelectionListChange } from '@angular/material/list';
 
 @Component({
   selector: 'app-category-products',
@@ -63,10 +62,16 @@ export class CategoryProductsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.pageParams$
+    combineLatest([this.pageParams$, this.pagination$])
       .pipe(
-        tap((params) => {
-          this._router.navigate([], params['categoryId']);
+        tap(([params, pagination]) => {
+          this._router.navigate([], {
+            queryParams: {
+              pageNumber: pagination.pageNumber,
+              pageSize: pagination.pageSize,
+            },
+            queryParamsHandling: 'merge',
+          });
           this._categoryIdSubject$.next(params['categoryId']);
         })
       )
