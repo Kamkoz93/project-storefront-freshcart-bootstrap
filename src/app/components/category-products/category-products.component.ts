@@ -4,23 +4,27 @@ import {
   OnInit,
   ViewEncapsulation,
 } from '@angular/core';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
   BehaviorSubject,
-  map,
   Observable,
+  combineLatest,
+  map,
   of,
   shareReplay,
   switchMap,
-  combineLatest,
-  tap,
   take,
+  tap,
+  startWith,
 } from 'rxjs';
-import { PaginationDataModel } from 'src/app/models/pagination-data.model';
-import { ProductModel } from 'src/app/models/product.model';
-import { ProductCategoryModel } from 'src/app/models/products-category.model';
-import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { ProductsService } from '../../services/products.service';
+import { StoresService } from '../../services/stores.service';
+import { ProductCategoryModel } from '../../models/products-category.model';
+import { ProductModel } from '../../models/product.model';
+import { PaginationDataModel } from '../../models/pagination-data.model';
+import { StoreModel } from '../../models/store.model';
 
 @Component({
   selector: 'app-category-products',
@@ -34,7 +38,8 @@ export class CategoryProductsComponent implements OnInit {
     private _categoriesService: CategoriesService,
     private _activatedRoute: ActivatedRoute,
     private _router: Router,
-    private _productsService: ProductsService
+    private _productsService: ProductsService,
+    private _storesService: StoresService
   ) {}
 
   readonly categoriesList$: Observable<ProductCategoryModel[]> =
@@ -132,43 +137,20 @@ export class CategoryProductsComponent implements OnInit {
       shareReplay(1)
     );
 
-  readonly productsByCategoryInit$: Observable<ProductModel[]> =
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
-            )
-          );
-      })
-    );
-
-  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
-            )
-          );
-      })
-    ),
-    this.sortOrder$,
-    this.pagination$,
-  ]).pipe(
-    map(([products, order, pagination]) => {
-      this.sortProds(products, order);
-      return this.paginateData(products, pagination);
-    })
-  );
+  // readonly productsByCategoryInit$: Observable<ProductModel[]> =
+  //   this.pageParams$.pipe(
+  //     switchMap((queryParams) => {
+  //       return this._productsService
+  //         .getAllProducts()
+  //         .pipe(
+  //           map((products) =>
+  //             products.filter(
+  //               (product) => product.categoryId === queryParams['categoryId']
+  //             )
+  //           )
+  //         );
+  //     })
+  //   );
 
   public paginateData(
     products: ProductModel[],
@@ -179,23 +161,6 @@ export class CategoryProductsComponent implements OnInit {
       pageData.pageSize * pageData.pageNumber
     );
   }
-
-  readonly pages$: Observable<number[]> = combineLatest([
-    this.productsByCategoryInit$,
-    this.pagination$,
-  ]).pipe(
-    map(([products, params]) => {
-      let result = [];
-      for (
-        let i = 1;
-        i <= Math.ceil(products.length / params['pageSize']);
-        i++
-      ) {
-        result.push(i);
-      }
-      return result;
-    })
-  );
 
   readonly pageSizeOptions$: Observable<number[]> = of([5, 10, 15]);
 
@@ -213,7 +178,6 @@ export class CategoryProductsComponent implements OnInit {
         )
       )
       .subscribe();
-    console.log(pageNumber);
   }
 
   updatePageSize(pageSize: number): void {
@@ -229,5 +193,111 @@ export class CategoryProductsComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  readonly filterForm: FormGroup = new FormGroup({
+    priceFrom: new FormControl(''),
+    priceTo: new FormControl(''),
+    rating: new FormControl(''),
+    storesArray: new FormArray([new FormControl()]),
+  });
+
+  readonly stores$: Observable<StoreModel[]> =
+    this._storesService.getAllStores();
+
+  readonly storeCheckboxes$: Observable<string[]> = this.stores$.pipe(
+    map((stores) => stores.map((store) => store.id))
+  );
+
+  readonly selectedFilterValues$: Observable<{
+    priceFrom: number;
+    priceTo: number;
+    rating: number;
+    storesArray: string[];
+  }> = this.filterForm.valueChanges.pipe(
+    startWith({
+      priceFrom: 0,
+      priceTo: 9999999,
+      rating: null,
+    }),
+    shareReplay(1)
+  );
+
+  public filterStores(event: any) {
+    const storesArray = this.filterForm.get('storesArray') as FormArray;
+
+    if (event.target.checked) {
+      storesArray.push(new FormControl(event.target.value));
+    } else {
+      let i = 0;
+      storesArray.controls.forEach((store) => {
+        if (store.value === event.target.value) {
+          storesArray.removeAt(i);
+          return;
+        }
+        i++;
+      });
+    }
+  }
+
+  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) => product.categoryId === queryParams['categoryId']
+              )
+            )
+          );
+      })
+    ),
+    this.sortOrder$,
+    this.pagination$,
+    this.selectedFilterValues$,
+  ]).pipe(
+    map(([products, order, pagination, filter]) => {
+      this.sortProds(products, order);
+      return this.filterProducts(products, filter);
+      // return this.paginateData(products, pagination);
+    })
+  );
+
+  readonly pages$: Observable<number[]> = combineLatest([
+    this.productsByCategory$,
+    this.pagination$,
+  ]).pipe(
+    map(([products, params]) => {
+      let result = [];
+      for (
+        let i = 1;
+        i <= Math.ceil(products.length / params['pageSize']);
+        i++
+      ) {
+        result.push(i);
+      }
+      return result;
+    })
+  );
+
+  public filterProducts(
+    products: ProductModel[],
+    filter: {
+      priceFrom: number;
+      priceTo: number;
+      rating: number;
+      storesArray: string[];
+    }
+  ): ProductModel[] {
+    return products.filter(
+      (product) =>
+        (!filter.priceFrom || filter.priceFrom <= product.price) &&
+        (!filter.priceTo || filter.priceTo >= product.price) &&
+        (!filter.rating || filter.rating <= product.ratingValue) &&
+        (!filter.storesArray ||
+          filter.storesArray.some((val) => product.storeIds.includes(val)))
+    );
   }
 }
