@@ -3,11 +3,13 @@ import {
   Component,
   ViewEncapsulation,
 } from '@angular/core';
-import { Observable, shareReplay } from 'rxjs';
-import { ProductCategoryModel } from 'src/app/models/products-category.model';
-import { StoreModel } from 'src/app/models/store.model';
-import { CategoriesService } from 'src/app/services/categories.service';
-import { StoresService } from 'src/app/services/stores.service';
+import { map, Observable, shareReplay, take } from 'rxjs';
+import { ProductCategoryModel } from '../../models/products-category.model';
+import { StoreModel } from '../../models/store.model';
+import { CategoriesService } from '../../services/categories.service';
+import { StoresService } from '../../services/stores.service';
+import { ProductsService } from '../../services/products.service';
+import { ProductModel } from 'src/app/models/product.model';
 
 @Component({
   selector: 'app-home',
@@ -18,14 +20,37 @@ import { StoresService } from 'src/app/services/stores.service';
 })
 export class HomeComponent {
   readonly categories$: Observable<ProductCategoryModel[]> =
-    this._productCategoriesService.getAllCategories().pipe(shareReplay(1));
+    this._productCategoriesService.getAllCategories();
 
-  readonly stores$: Observable<StoreModel[]> = this._storesService
-    .getAllStores()
-    .pipe(shareReplay(1));
+  readonly stores$: Observable<StoreModel[]> =
+    this._storesService.getAllStores();
+
+  readonly fruitsAndVegetablesList$: Observable<ProductModel[]> =
+    this._productsService.getAllProducts().pipe(
+      map((products) => {
+        return this.mapTwoFeaturesProdList(
+          products.filter((product: ProductModel) => +product.categoryId === 5)
+        );
+      }),
+      shareReplay(1)
+    );
+
+  readonly snacksAndMunchiesList$: Observable<ProductModel[]> =
+    this._productsService.getAllProducts().pipe(
+      map((products) => {
+        return this.mapTwoFeaturesProdList(
+          products.filter((product: ProductModel) => +product.categoryId === 2)
+        );
+      })
+    );
+
+  private mapTwoFeaturesProdList(products: ProductModel[]): ProductModel[] {
+    return products.sort((a, b) => b.featureValue - a.featureValue).slice(0, 5);
+  }
 
   constructor(
     private _productCategoriesService: CategoriesService,
-    private _storesService: StoresService
+    private _storesService: StoresService,
+    private _productsService: ProductsService
   ) {}
 }
