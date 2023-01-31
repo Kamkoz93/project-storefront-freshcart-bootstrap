@@ -28,7 +28,7 @@
         </div>
         <div class="row">
             <div *ngFor="let product of fruitsAndVegetablesList$ | async" class="col-2">
-                <a routerLink="categories/{{product.id}}" class="text-decoration-none text-inherit">
+                <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
 
                     <div class="card card-product">
                         <div class="card-body">
@@ -36,7 +36,9 @@
                                 <a><img src="{{product.imageUrl}}" alt="Grocery Ecommerce Template"
                                         class="mb-3 img-fluid"></a>
                             </div>
-                            <h2 class="fs-6">{{product.name}}</h2>
+                            <!-- title -->
+                            <h2 class="fs-6 text-truncate">{{product.name}}</h2>
+                            <!-- price -->
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div> <span class="text-dark">${{product.price}}</span> </div>
                             </div>
@@ -57,14 +59,16 @@
         </div>
         <div class="row">
             <div *ngFor="let product of snacksAndMunchiesList$ | async" class="col-2">
-                <a routerLink="categories/{{product.id}}" class="text-decoration-none text-inherit">
+                <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
                     <div class="card card-product">
                         <div class="card-body">
                             <div class="text-center position-relative">
                                 <a><img src="{{product.imageUrl}}" alt="Grocery Ecommerce Template"
                                         class="mb-3 img-fluid"></a>
                             </div>
-                            <h2 class="fs-6">{{product.name}}</h2>
+                            <!-- title -->
+                            <h2 class="fs-6 text-truncate">{{product.name}}</h2>
+                            <!-- price -->
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div> <span class="text-dark">${{product.price}}</span> </div>
                             </div>
@@ -105,7 +109,8 @@
                         </div>
                         <div>
                             <!-- badge -->
-                            <div class="badge text-bg-light border">{{store.distanceInMeters}} km</div>
+                            <div class="badge text-bg-light border">{{(store.distanceInMeters/1000).toFixed(2)}} km
+                            </div>
                         </div>
                     </div>
                 </div>

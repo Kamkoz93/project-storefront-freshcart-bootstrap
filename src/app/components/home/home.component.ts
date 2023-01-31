@@ -3,13 +3,15 @@ import {
   Component,
   ViewEncapsulation,
 } from '@angular/core';
-import { map, Observable, shareReplay, take } from 'rxjs';
+import { combineLatest, map, Observable, shareReplay, take } from 'rxjs';
 import { ProductCategoryModel } from '../../models/products-category.model';
 import { StoreModel } from '../../models/store.model';
 import { CategoriesService } from '../../services/categories.service';
 import { StoresService } from '../../services/stores.service';
 import { ProductsService } from '../../services/products.service';
 import { ProductModel } from 'src/app/models/product.model';
+import { StoreWithTagsQueryModel } from 'src/app/query-models/store-with-tags.query-model';
+import { StoreTagModel } from 'src/app/models/store-tag.model';
 
 @Component({
   selector: 'app-home',
@@ -19,11 +21,21 @@ import { ProductModel } from 'src/app/models/product.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
+  constructor(
+    private _productCategoriesService: CategoriesService,
+    private _storesService: StoresService,
+    private _productsService: ProductsService
+  ) {}
+
   readonly categories$: Observable<ProductCategoryModel[]> =
     this._productCategoriesService.getAllCategories();
 
-  readonly stores$: Observable<StoreModel[]> =
-    this._storesService.getAllStores();
+  readonly stores$: Observable<StoreWithTagsQueryModel[]> = combineLatest([
+    this._storesService.getAllStores(),
+    this._storesService.getAllStoreTags(),
+  ]).pipe(
+    map(([stores, storeTags]) => this.mapStoresWithTagNames(stores, storeTags))
+  );
 
   readonly productsList$: Observable<ProductModel[]> = this._productsService
     .getAllProducts()
@@ -48,13 +60,20 @@ export class HomeComponent {
       })
     );
 
+  private mapStoresWithTagNames(
+    stores: StoreModel[],
+    storeTags: StoreTagModel[]
+  ): StoreWithTagsQueryModel[] {
+    const storeTagsMap = storeTags.reduce((a, c) => {
+      return { ...a, [c.id]: c };
+    }, {} as Record<string, StoreTagModel>);
+    return stores.map((store) => ({
+      ...store,
+      tagNames: store.tagIds.map((tId: string) => storeTagsMap[tId]?.name),
+    }));
+  }
+
   private mapTwoFeaturesProdList(products: ProductModel[]): ProductModel[] {
     return products.sort((a, b) => b.featureValue - a.featureValue).slice(0, 5);
   }
-
-  constructor(
-    private _productCategoriesService: CategoriesService,
-    private _storesService: StoresService,
-    private _productsService: ProductsService
-  ) {}
 }
