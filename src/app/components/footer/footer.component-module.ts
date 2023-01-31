@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { RouteConfigLoadEnd, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { FooterComponent } from './footer.component';
 
 @NgModule({
