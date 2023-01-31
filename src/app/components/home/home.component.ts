@@ -50,7 +50,6 @@ export class HomeComponent {
       }),
       shareReplay(1)
     );
-
   readonly snacksAndMunchiesList$: Observable<ProductModel[]> =
     this.productsList$.pipe(
       map((products) => {
