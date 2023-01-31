@@ -17,6 +17,7 @@ import {
 } from 'rxjs';
 import { ProductModel } from 'src/app/models/product.model';
 import { ProductCategoryModel } from 'src/app/models/products-category.model';
+import { ProductWithRatingOptionsQueryModel } from 'src/app/query-models/product-with-rating-options.query-model';
 import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
 
@@ -59,6 +60,21 @@ export class CategoryProductsComponent implements OnInit {
     this._categoryIdSubject$.next(id);
   }
 
+  readonly productsByCategory$: Observable<
+    ProductWithRatingOptionsQueryModel[]
+  > = this.pageParams$.pipe(
+    switchMap((queryParams) => {
+      return this._productsService.getAllProducts().pipe(
+        map((products) => {
+          const filteredProds = products.filter(
+            (product) => product.categoryId === queryParams['categoryId']
+          );
+          return this.mapProductsToProductcWithRatingOptions(filteredProds);
+        })
+      );
+    })
+  );
+
   ngOnInit() {
     this.pageParams$
       .pipe(
@@ -68,6 +84,16 @@ export class CategoryProductsComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  mapProductsToProductcWithRatingOptions(
+    products: ProductWithRatingOptionsQueryModel[]
+  ): ProductWithRatingOptionsQueryModel[] {
+    console.log(products.length);
+    return products.map((product) => ({
+      ...product,
+      ratingOptions: this.createRatingOptions(product.ratingValue),
+    }));
   }
 
   createRatingOptions(rating: number): number[] {

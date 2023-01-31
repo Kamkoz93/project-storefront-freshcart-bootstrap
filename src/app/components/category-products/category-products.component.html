@@ -43,7 +43,7 @@
                             <div>
                                 <div>
                                     <small class="text-warning">
-                                        <i *ngFor="let val of createRatingOptions(item.ratingValue)" class="bi"
+                                        <i *ngFor="let val of item.ratingOptions" class="bi"
                                             [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
                                         </i>
                                     </small>

@@ -58,7 +58,7 @@ export class StoreProductsComponent implements OnInit {
     })
   );
 
-  readonly store$: Observable<StoreModel> = this.pageParams$.pipe(
+  readonly stores$: Observable<StoreModel> = this.pageParams$.pipe(
     switchMap((params) => this._storesService.getStoreById(params['storeId'])),
     take(1),
     shareReplay(1)
