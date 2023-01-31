@@ -1,0 +1,55 @@
+<section class="my-lg-10 my-8" *ngIf="productsByCategory$ | async as products">
+    <div class="container" *ngIf="categoriesList$ | async as categories">
+        <div class="row gx-10">
+            <aside class="col-lg-3 col-md-4 mb-6 mb-md-0">
+                <div class="mb-8">
+                    <h5 class="mb-3">Categories</h5>
+                    <ul class="nav nav-category" id="categoryCollapseMenu">
+                        <li *ngFor="let category of categories" class="nav-item border-bottom w-100"><a
+                                (click)="selectCategoryId(category.id)" routerLink="/categories/{{category.id}}"
+                                class="nav-link">{{category.name}}<i class="feather-icon icon-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+            <section class="col-lg-9 col-md-12" *ngIf="categoryDetails$ | async as categoryDetails">
+                <div class="card mb-4 bg-light border-0 d-flex flex-row w-100">
+                    <div class="card-body p-9">
+                        <h3 class="mb-0">{{categoryDetails.name}}</h3>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-3 mb-md-0"><span _ngcontent-cmb-c19="" class="text-primary">{{products.length}}</span>
+                        Products found</p>
+                </div>
+                <div *ngFor="let item of products" class="col">
+                    <div class="card flex-row align-items-center card-product mb-5">
+                        <div>
+                            <img src="{{item.imageUrl}}" alt="{{item.name}}" class="mb-3 img-fluid">
+                        </div>
+                        <div class="ms-6">
+                            <div class="small text-muted">
+                                <ng-container><span>{{categoryDetails.name}}</span>
+                                </ng-container>
+                            </div>
+                            <h5 class="mb-1"><a class="text-inherit">{{item.name}}</a></h5>
+                            <div>
+                                <div>
+                                    <small class="text-warning">
+                                        <i *ngFor="let val of item.ratingOptions" class="bi"
+                                            [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
+                                        </i>
+                                    </small>
+                                    <span class="text-muted small">{{item.ratingValue}}({{item.ratingCount}})</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div> <span class="text-dark">${{item.price}}</span> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
