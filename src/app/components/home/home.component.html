@@ -5,8 +5,8 @@
                 <h3>Shop by Categeory</h3>
             </div>
         </div>
-        <div class="row">
-            <div *ngFor="let category of categories$ | async" class="col-3">
+        <div class="row g-4 row-cols-lg-4 row-cols-2 row-cols-md-3">
+            <div *ngFor="let category of categories$ | async" class="col">
                 <a routerLink="categories/{{category.id}}" class="text-decoration-none text-inherit">
                     <div class="card card-product mb-5">
                         <div class="card-body text-center py-8">
@@ -27,8 +27,8 @@
                 <h3>Fruits & Vegetables</h3>
             </div>
         </div>
-        <div class="row">
-            <div *ngFor="let product of fruitsAndVegetablesList$ | async" class="col-2">
+        <div class="row g-4 row-cols-lg-6 row-cols-2 row-cols-md-3">
+            <div *ngFor="let product of fruitsAndVegetablesList$ | async" class="col">
                 <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
 
                     <div class="card card-product">
@@ -59,8 +59,8 @@
                 <h3>Snacks & Munchies</h3>
             </div>
         </div>
-        <div class="row">
-            <div *ngFor="let product of snacksAndMunchiesList$ | async" class="col-2">
+        <div class="row g-4 row-cols-lg-6 row-cols-2 row-cols-md-3">
+            <div *ngFor="let product of snacksAndMunchiesList$ | async" class="col">
                 <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
 
                     <div class="card card-product">
@@ -84,7 +84,7 @@
     </div>
 </section>
 
-<section class="my-lg-14 my-8">
+<section class="mt-6 mb-lg-14 mb-8">
     <div *ngIf="stores$ | async as storeList" class="container">
         <div class="col-12">
             <div class="mb-4">
@@ -92,9 +92,9 @@
                 <h6>We have <span class="text-primary">{{storeList.length}}</span> vendors now</h6>
             </div>
         </div>
-        <div class="row">
-            <div *ngFor="let store of storeList" class="col-4">
-                <div class="card flex-row p-8 card-product mb-5">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 g-lg-4">
+            <div *ngFor="let store of storeList" class="col">
+                <div class="card flex-row p-8 card-product">
                     <div><img [src]="store.logoUrl" [alt]="store" class="rounded-circle icon-shape icon-xl"></div>
                     <div class="ms-6">
                         <h5 class="mb-1"><a routerLink="stores/{{store.id}}" class="text-inherit">{{store.name}}</a>
