@@ -1,0 +1,75 @@
+<section id="storeDetails" class="my-lg-14 my-8">
+    <div class="container" *ngIf="stores$ | async as store">
+        <div class="d-flex justify-content-between">
+            <ng-container>
+                <div class="d-flex flex-column">
+                    <div>
+                        <!-- img -->
+                        <img [src]="store.logoUrl" [alt]="store" class="rounded-circle icon-shape icon-xxl">
+                    </div>
+                    <!-- heading -->
+                    <div class="mt-4">
+                        <h3 class="mb-1 h4">{{store.name}}</h3>
+                        <div class="small text-muted"> It's only
+                            <span>{{(store.distanceInMeters/1000).toFixed(2)}} km </span>away
+                            from you!
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container>
+                <!-- card -->
+                <div class="card mb-4 bg-light border-0 d-flex flex-row">
+                    <!-- card body -->
+                    <div class="card-body p-9">
+                        <h6 class="mb-0">{{store.name}}</h6>
+                        <div class="small text-muted"> <span>Whatever the ocasion, we've got you covered.</span> </div>
+                        <div class="input-group">
+                            <input matInput [formControl]="searchProdInStore" type="text" aria-label="Last name"
+                                class="form-control w-45" placeholder="Search {{store.name}}">
+                            <button class="input-group-text bg-transparent" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-search">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                    <div><img src="/assets/images/svg-graphics/store-graphics.svg" /></div>
+                </div>
+            </ng-container>
+        </div>
+        <div class="container" *ngIf="filteredStoreProds$ | async as storeProducts">
+            <div class="col-12">
+                <div class="mb-4">
+                    <h3>{{store.name}} products:</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div *ngFor="let product of storeProducts" class="col-2">
+                    <a routerLink="/" class="text-decoration-none text-inherit">
+
+                        <div class="card card-product mb-5">
+                            <div class="card-body">
+                                <div class="text-center position-relative">
+                                    <!-- img -->
+                                    <a><img src="{{product.imageUrl}}" alt="Grocery Ecommerce Template"
+                                            class="mb-3 img-fluid"></a>
+                                </div>
+                                <!-- title -->
+                                <h2 class="fs-6 text-truncate">{{product.name}}</h2>
+                                <!-- price -->
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div> <span class="text-dark">${{product.price}}</span> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
