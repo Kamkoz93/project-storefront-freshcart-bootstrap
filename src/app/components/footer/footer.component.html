@@ -18,7 +18,7 @@
                     <div class="col-12">
                         <h6 class="mb-4">Stores</h6>
                         <ul *ngFor="let store of stores$ | async" class="nav flex-column">
-                            <li class="nav-item"><a routerLink="categories/{{store.id}}"
+                            <li class="nav-item"><a routerLink="stores/{{store.id}}"
                                     class="nav-link p-0 text-muted">{{store.name}}</a>
                             </li>
                         </ul>
