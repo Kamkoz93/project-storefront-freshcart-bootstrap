@@ -205,7 +205,6 @@ export class CategoryProductsComponent implements OnInit {
   public mapProductsToProductsWithRatingOptions(
     products: ProductWithRatingOptionsQueryModel[]
   ): ProductWithRatingOptionsQueryModel[] {
-    console.log(products.length);
     return products.map((product) => ({
       ...product,
       ratingOptions: this.createRatingOptions(product.ratingValue),
