@@ -173,6 +173,14 @@ export class CategoryProductsComponent implements OnInit {
     })
   );
 
+  public sortProdsSubject(order: any): void {
+    this._sortSubject.next(order.value);
+  }
+
+  public selectCategoryId(id: string): void {
+    this._categoryIdSubject$.next(id);
+  }
+
   public sortProds(
     products: ProductWithRatingOptionsQueryModel[],
     sortOrder: string
