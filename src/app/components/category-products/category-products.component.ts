@@ -25,6 +25,7 @@ import { ProductCategoryModel } from '../../models/products-category.model';
 import { ProductModel } from '../../models/product.model';
 import { PaginationDataModel } from '../../models/pagination-data.model';
 import { StoreModel } from '../../models/store.model';
+import { FilterModel } from 'src/app/models/filter.model';
 
 @Component({
   selector: 'app-category-products',
@@ -44,12 +45,40 @@ export class CategoryProductsComponent implements OnInit {
 
   readonly categoriesList$: Observable<ProductCategoryModel[]> =
     this._categoriesService.getAllCategories().pipe(shareReplay(1));
+
   readonly pageParams$: Observable<Params> = this._activatedRoute.params.pipe(
     map((params) => ({
       categoryId: params['categoryId'],
     })),
     shareReplay(1)
   );
+
+  readonly productsByCategoryInit$: Observable<ProductModel[]> =
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) => product.categoryId === queryParams['categoryId']
+              )
+            )
+          );
+      })
+    );
+
+  private _sortSubject: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'Featured'
+  );
+  public sortOrder$: Observable<string> = this._sortSubject.asObservable();
+
+  public sortOrderOptions$: Observable<string[]> = of([
+    'Featured',
+    'Price: Low to High',
+    'Price: High to Low',
+    'Avg. Rating',
+  ]);
 
   private _categoryIdSubject$: BehaviorSubject<string> =
     new BehaviorSubject<string>('');
@@ -62,8 +91,202 @@ export class CategoryProductsComponent implements OnInit {
       switchMap((data) => this._categoriesService.getCategoryById(data))
     );
 
-  selectCategoryId(id: string): void {
+  readonly pagination$: Observable<PaginationDataModel> =
+    this._activatedRoute.queryParams.pipe(
+      map((params) => ({
+        pageNumber: params['pageNumber'] ? +params['pageNumber'] : 1,
+        pageSize: params['pageSize'] ? +params['pageSize'] : 5,
+      })),
+      shareReplay(1)
+    );
+
+  readonly pageSizeOptions$: Observable<number[]> = of([5, 10, 15]);
+
+  readonly filterForm: FormGroup = new FormGroup({
+    priceFrom: new FormControl(''),
+    priceTo: new FormControl(''),
+    rating: new FormControl(''),
+    storesArray: new FormArray([]),
+    typedStoreName: new FormControl(''),
+  });
+
+  readonly selectedFilterValues$: Observable<FilterModel> =
+    this.filterForm.valueChanges.pipe(
+      startWith({
+        priceFrom: 0,
+        priceTo: 9999999,
+        rating: null,
+        typedStoreName: '',
+      }),
+      shareReplay(1)
+    );
+
+  readonly stores$: Observable<StoreModel[]> = combineLatest([
+    this._storesService.getAllStores(),
+    this.selectedFilterValues$,
+  ]).pipe(
+    map(([stores, searchForm]) =>
+      stores.filter((store) =>
+        store.name
+          .toLowerCase()
+          .includes(searchForm.typedStoreName?.toLowerCase())
+      )
+    )
+  );
+
+  readonly storeCheckboxes$: Observable<string[]> = this.stores$.pipe(
+    map((stores) => stores.map((store) => store.id))
+  );
+
+  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
+    this.productsByCategoryInit$,
+    this.sortOrder$,
+    this.pagination$,
+    this.selectedFilterValues$,
+  ]).pipe(
+    map(([products, order, pagination, filter]) => {
+      const sortedProducts = this.sortProds([...products], order);
+      const filteredProducts = this.filterProducts([...sortedProducts], filter);
+      return this.paginateData(filteredProducts, pagination);
+    })
+  );
+
+  readonly pages$: Observable<number[]> = combineLatest([
+    this.productsByCategoryInit$,
+    this.pagination$,
+  ]).pipe(
+    map(([products, params]) => {
+      let result = [];
+      for (
+        let i = 1;
+        i <= Math.ceil(products.length / params['pageSize']);
+        i++
+      ) {
+        result.push(i);
+      }
+      return result;
+    })
+  );
+
+  public sortProdsSubject(order: any): void {
+    this._sortSubject.next(order.value);
+  }
+
+  public selectCategoryId(id: string): void {
     this._categoryIdSubject$.next(id);
+  }
+
+  public sortProds(
+    products: ProductModel[],
+    sortOrder: string
+  ): ProductModel[] {
+    switch (sortOrder) {
+      case 'Price: Low to High':
+        products.sort((a, b) => a.price - b.price);
+        break;
+      case 'Price: High to Low':
+        products.sort((a, b) => b.price - a.price);
+        break;
+      case 'Featured':
+        products.sort((a, b) => b.featureValue - a.featureValue);
+        break;
+      case 'Avg. Rating':
+        products.sort((a, b) => b.ratingValue - a.ratingValue);
+        break;
+    }
+    return products;
+  }
+
+  public createRatingOptions(rating: number): number[] {
+    const ratingOptions = [];
+    for (let i = 0; i < 5; i++) {
+      if (i < Math.floor(rating)) {
+        ratingOptions[i] = 1;
+      } else if (i == Math.floor(rating) && rating % 1 !== 0) {
+        ratingOptions[i] = 0.5;
+      }
+    }
+    return ratingOptions;
+  }
+
+  private paginateData(
+    products: ProductModel[],
+    pageData: PaginationDataModel
+  ): ProductModel[] {
+    return products.slice(
+      pageData.pageSize * (pageData.pageNumber - 1),
+      pageData.pageSize * pageData.pageNumber
+    );
+  }
+
+  public updatePageNum(pageNumber: number): void {
+    this.pagination$
+      .pipe(
+        take(1),
+        tap((params) =>
+          this._router.navigate([], {
+            queryParams: {
+              pageNumber: pageNumber,
+              pageSize: params['pageSize'],
+            },
+          })
+        )
+      )
+      .subscribe();
+  }
+
+  public updatePageSize(pageSize: number): void {
+    combineLatest([
+      this.pagination$.pipe(take(1)),
+      this.productsByCategoryInit$,
+    ])
+      .pipe(
+        tap(([params, products]) => {
+          this._router.navigate([], {
+            queryParams: {
+              pageNumber: 1,
+              pageSize: pageSize,
+            },
+          });
+        })
+      )
+      .subscribe();
+  }
+
+  public filterStores(event: any) {
+    const storesArray = this.filterForm.get('storesArray') as FormArray;
+    if (event.target.checked) {
+      storesArray.push(new FormControl(event.target.value));
+    } else {
+      let i = 0;
+      storesArray.controls.forEach((store) => {
+        if (store.value === event.target.value) {
+          storesArray.removeAt(i);
+          return;
+        }
+        i++;
+      });
+    }
+  }
+
+  public filterProducts(
+    products: ProductModel[],
+    filter: {
+      priceFrom: number;
+      priceTo: number;
+      rating: number;
+      storesArray: string[];
+    }
+  ): ProductModel[] {
+    return products.filter(
+      (product) =>
+        (!filter.priceFrom || filter.priceFrom <= product.price) &&
+        (!filter.priceTo || filter.priceTo >= product.price) &&
+        (!filter.rating || filter.rating <= product.ratingValue) &&
+        (!filter.storesArray ||
+          filter.storesArray.length === 0 ||
+          filter.storesArray.some((val) => product.storeIds.includes(val)))
+    );
   }
 
   ngOnInit() {
@@ -81,223 +304,5 @@ export class CategoryProductsComponent implements OnInit {
         })
       )
       .subscribe();
-  }
-
-  createRatingOptions(rating: number): number[] {
-    const ratingOptions = [];
-    for (let i = 0; i < 5; i++) {
-      if (i < Math.floor(rating)) {
-        ratingOptions[i] = 1;
-      } else if (i == Math.floor(rating) && rating % 1 !== 0) {
-        ratingOptions[i] = 0.5;
-      }
-    }
-    return ratingOptions;
-  }
-
-  private _sortSubject: BehaviorSubject<string> = new BehaviorSubject<string>(
-    'Featured'
-  );
-
-  public sortOrder$: Observable<string> = this._sortSubject.asObservable();
-
-  public sortOrderOptions$: Observable<string[]> = of([
-    'Featured',
-    'Price: Low to High',
-    'Price: High to Low',
-    'Avg. Rating',
-  ]);
-
-  public sortProds(
-    products: ProductModel[],
-    sortOrder: string
-  ): ProductModel[] {
-    sortOrder === 'Price: Low to High'
-      ? products.sort((a, b) => a.price - b.price)
-      : sortOrder === 'Price: High to Low'
-      ? products.sort((a, b) => b.price - a.price)
-      : sortOrder === 'Featured'
-      ? products.sort((a, b) => b.featureValue - a.featureValue)
-      : sortOrder === 'Avg. Rating'
-      ? products.sort((a, b) => b.ratingValue - a.ratingValue)
-      : products;
-    return products;
-  }
-
-  sortProdsSubject(order: any): void {
-    this._sortSubject.next(order.value);
-  }
-
-  readonly pagination$: Observable<PaginationDataModel> =
-    this._activatedRoute.queryParams.pipe(
-      map((params) => ({
-        pageNumber: params['pageNumber'] ? +params['pageNumber'] : 1,
-        pageSize: params['pageSize'] ? +params['pageSize'] : 5,
-      })),
-      shareReplay(1)
-    );
-
-  // readonly productsByCategoryInit$: Observable<ProductModel[]> =
-  //   this.pageParams$.pipe(
-  //     switchMap((queryParams) => {
-  //       return this._productsService
-  //         .getAllProducts()
-  //         .pipe(
-  //           map((products) =>
-  //             products.filter(
-  //               (product) => product.categoryId === queryParams['categoryId']
-  //             )
-  //           )
-  //         );
-  //     })
-  //   );
-
-  public paginateData(
-    products: ProductModel[],
-    pageData: PaginationDataModel
-  ): ProductModel[] {
-    return products.slice(
-      pageData.pageSize * (pageData.pageNumber - 1),
-      pageData.pageSize * pageData.pageNumber
-    );
-  }
-
-  readonly pageSizeOptions$: Observable<number[]> = of([5, 10, 15]);
-
-  updatePageNum(pageNumber: number): void {
-    this.pagination$
-      .pipe(
-        take(1),
-        tap((params) =>
-          this._router.navigate([], {
-            queryParams: {
-              pageNumber: pageNumber,
-              pageSize: params['pageSize'],
-            },
-          })
-        )
-      )
-      .subscribe();
-  }
-
-  updatePageSize(pageSize: number): void {
-    combineLatest([this.pagination$.pipe(take(1)), this.productsByCategory$])
-      .pipe(
-        tap(([params, products]) => {
-          this._router.navigate([], {
-            queryParams: {
-              pageNumber: Math.min(Math.ceil(products.length / pageSize)),
-              pageSize: pageSize,
-            },
-          });
-        })
-      )
-      .subscribe();
-  }
-
-  readonly filterForm: FormGroup = new FormGroup({
-    priceFrom: new FormControl(''),
-    priceTo: new FormControl(''),
-    rating: new FormControl(''),
-    storesArray: new FormArray([new FormControl()]),
-  });
-
-  readonly stores$: Observable<StoreModel[]> =
-    this._storesService.getAllStores();
-
-  readonly storeCheckboxes$: Observable<string[]> = this.stores$.pipe(
-    map((stores) => stores.map((store) => store.id))
-  );
-
-  readonly selectedFilterValues$: Observable<{
-    priceFrom: number;
-    priceTo: number;
-    rating: number;
-    storesArray: string[];
-  }> = this.filterForm.valueChanges.pipe(
-    startWith({
-      priceFrom: 0,
-      priceTo: 9999999,
-      rating: null,
-    }),
-    shareReplay(1)
-  );
-
-  public filterStores(event: any) {
-    const storesArray = this.filterForm.get('storesArray') as FormArray;
-
-    if (event.target.checked) {
-      storesArray.push(new FormControl(event.target.value));
-    } else {
-      let i = 0;
-      storesArray.controls.forEach((store) => {
-        if (store.value === event.target.value) {
-          storesArray.removeAt(i);
-          return;
-        }
-        i++;
-      });
-    }
-  }
-
-  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
-            )
-          );
-      })
-    ),
-    this.sortOrder$,
-    this.pagination$,
-    this.selectedFilterValues$,
-  ]).pipe(
-    map(([products, order, pagination, filter]) => {
-      this.sortProds(products, order);
-      return this.filterProducts(products, filter);
-      // return this.paginateData(products, pagination);
-    })
-  );
-
-  readonly pages$: Observable<number[]> = combineLatest([
-    this.productsByCategory$,
-    this.pagination$,
-  ]).pipe(
-    map(([products, params]) => {
-      let result = [];
-      for (
-        let i = 1;
-        i <= Math.ceil(products.length / params['pageSize']);
-        i++
-      ) {
-        result.push(i);
-      }
-      return result;
-    })
-  );
-
-  public filterProducts(
-    products: ProductModel[],
-    filter: {
-      priceFrom: number;
-      priceTo: number;
-      rating: number;
-      storesArray: string[];
-    }
-  ): ProductModel[] {
-    return products.filter(
-      (product) =>
-        (!filter.priceFrom || filter.priceFrom <= product.price) &&
-        (!filter.priceTo || filter.priceTo >= product.price) &&
-        (!filter.rating || filter.rating <= product.ratingValue) &&
-        (!filter.storesArray ||
-          filter.storesArray.some((val) => product.storeIds.includes(val)))
-    );
   }
 }
