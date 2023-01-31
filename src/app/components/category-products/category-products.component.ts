@@ -154,7 +154,7 @@ export class CategoryProductsComponent implements OnInit {
       const filteredProducts = this.filterProducts([...sortedProducts], filter);
       return this.paginateData(filteredProducts, pagination);
     })
-  )
+  );
 
   readonly pages$: Observable<number[]> = combineLatest([
     this.productsByCategoryInit$,
@@ -173,6 +173,26 @@ export class CategoryProductsComponent implements OnInit {
     })
   );
 
+  public sortProds(
+    products: ProductWithRatingOptionsQueryModel[],
+    sortOrder: string
+  ): ProductWithRatingOptionsQueryModel[] {
+    switch (sortOrder) {
+      case 'Price: Low to High':
+        products.sort((a, b) => a.price - b.price);
+        break;
+      case 'Price: High to Low':
+        products.sort((a, b) => b.price - a.price);
+        break;
+      case 'Featured':
+        products.sort((a, b) => b.featureValue - a.featureValue);
+        break;
+      case 'Avg. Rating':
+        products.sort((a, b) => b.ratingValue - a.ratingValue);
+        break;
+    }
+    return products;
+  }
 
   public mapProductsToProductsWithRatingOptions(
     products: ProductWithRatingOptionsQueryModel[]
