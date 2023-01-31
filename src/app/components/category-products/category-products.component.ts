@@ -14,15 +14,15 @@ import {
   of,
   shareReplay,
   switchMap,
-  take,
   tap,
   startWith,
+  take,
 } from 'rxjs';
+import { ProductWithRatingOptionsQueryModel } from 'src/app/query-models/product-with-rating-options.query-model';
+import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
-import { ProductsService } from '../../services/products.service';
 import { StoresService } from '../../services/stores.service';
 import { ProductCategoryModel } from '../../models/products-category.model';
-import { ProductModel } from '../../models/product.model';
 import { PaginationDataModel } from '../../models/pagination-data.model';
 import { StoreModel } from '../../models/store.model';
 import { FilterModel } from 'src/app/models/filter.model';
@@ -53,20 +53,21 @@ export class CategoryProductsComponent implements OnInit {
     shareReplay(1)
   );
 
-  readonly productsByCategoryInit$: Observable<ProductModel[]> =
-    this.pageParams$.pipe(
-      switchMap((queryParams) => {
-        return this._productsService
-          .getAllProducts()
-          .pipe(
-            map((products) =>
-              products.filter(
-                (product) => product.categoryId === queryParams['categoryId']
-              )
+  readonly productsByCategoryInit$: Observable<
+    ProductWithRatingOptionsQueryModel[]
+  > = this.pageParams$.pipe(
+    switchMap((queryParams) => {
+      return this._productsService
+        .getAllProducts()
+        .pipe(
+          map((products) =>
+            products.filter(
+              (product) => product.categoryId === queryParams['categoryId']
             )
-          );
-      })
-    );
+          )
+        );
+    })
+  );
 
   private _sortSubject: BehaviorSubject<string> = new BehaviorSubject<string>(
     'Featured'
@@ -138,14 +139,18 @@ export class CategoryProductsComponent implements OnInit {
     map((stores) => stores.map((store) => store.id))
   );
 
-  readonly productsByCategory$: Observable<ProductModel[]> = combineLatest([
+  readonly productsByCategory$: Observable<
+    ProductWithRatingOptionsQueryModel[]
+  > = combineLatest([
     this.productsByCategoryInit$,
     this.sortOrder$,
     this.pagination$,
     this.selectedFilterValues$,
   ]).pipe(
     map(([products, order, pagination, filter]) => {
-      const sortedProducts = this.sortProds([...products], order);
+      const prodsWithRatings =
+        this.mapProductsToProductsWithRatingOptions(products);
+      const sortedProducts = this.sortProds([...prodsWithRatings], order);
       const filteredProducts = this.filterProducts([...sortedProducts], filter);
       return this.paginateData(filteredProducts, pagination);
     })
@@ -177,9 +182,9 @@ export class CategoryProductsComponent implements OnInit {
   }
 
   public sortProds(
-    products: ProductModel[],
+    products: ProductWithRatingOptionsQueryModel[],
     sortOrder: string
-  ): ProductModel[] {
+  ): ProductWithRatingOptionsQueryModel[] {
     switch (sortOrder) {
       case 'Price: Low to High':
         products.sort((a, b) => a.price - b.price);
@@ -197,6 +202,15 @@ export class CategoryProductsComponent implements OnInit {
     return products;
   }
 
+  public mapProductsToProductsWithRatingOptions(
+    products: ProductWithRatingOptionsQueryModel[]
+  ): ProductWithRatingOptionsQueryModel[] {
+    return products.map((product) => ({
+      ...product,
+      ratingOptions: this.createRatingOptions(product.ratingValue),
+    }));
+  }
+
   public createRatingOptions(rating: number): number[] {
     const ratingOptions = [];
     for (let i = 0; i < 5; i++) {
@@ -210,9 +224,9 @@ export class CategoryProductsComponent implements OnInit {
   }
 
   private paginateData(
-    products: ProductModel[],
+    products: ProductWithRatingOptionsQueryModel[],
     pageData: PaginationDataModel
-  ): ProductModel[] {
+  ): ProductWithRatingOptionsQueryModel[] {
     return products.slice(
       pageData.pageSize * (pageData.pageNumber - 1),
       pageData.pageSize * pageData.pageNumber
@@ -270,14 +284,14 @@ export class CategoryProductsComponent implements OnInit {
   }
 
   public filterProducts(
-    products: ProductModel[],
+    products: ProductWithRatingOptionsQueryModel[],
     filter: {
       priceFrom: number;
       priceTo: number;
       rating: number;
       storesArray: string[];
     }
-  ): ProductModel[] {
+  ): ProductWithRatingOptionsQueryModel[] {
     return products.filter(
       (product) =>
         (!filter.priceFrom || filter.priceFrom <= product.price) &&

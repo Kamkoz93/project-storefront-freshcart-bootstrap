@@ -42,7 +42,7 @@ export class HomeComponent {
     .pipe(shareReplay(1));
 
   readonly fruitsAndVegetablesList$: Observable<ProductModel[]> =
-    this._productsService.getAllProducts().pipe(
+    this.productsList$.pipe(
       map((products) => {
         return this.mapTwoFeaturesProdList(
           products.filter((product: ProductModel) => +product.categoryId === 5)
@@ -50,7 +50,6 @@ export class HomeComponent {
       }),
       shareReplay(1)
     );
-
   readonly snacksAndMunchiesList$: Observable<ProductModel[]> =
     this.productsList$.pipe(
       map((products) => {
