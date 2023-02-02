@@ -74,14 +74,16 @@
                 <div *ngFor="let item of products" class="col">
                     <div class="card flex-row align-items-center card-product mb-5">
                         <div>
-                            <img src="{{item.imageUrl}}" alt="{{item.name}}" class="mb-3 img-fluid">
+                            <img routerLink="/product/{{item.id}}" src="{{item.imageUrl}}" alt="{{item.name}}"
+                                class="mb-3 img-fluid">
                         </div>
                         <div class="ms-6">
                             <div class="small text-muted">
                                 <ng-container><span>{{categoryDetails.name}}</span>
                                 </ng-container>
                             </div>
-                            <h5 class="mb-1"><a class="text-inherit">{{item.name}}</a></h5>
+                            <h5 class="mb-1"><a routerLink="/product/{{item.id}}" class="text-inherit">{{item.name}}</a>
+                            </h5>
                             <div>
                                 <div>
                                     <small class="text-warning">
