@@ -28,7 +28,7 @@
         </div>
         <div class="row g-4 row-cols-lg-6 row-cols-2 row-cols-md-3">
             <div *ngFor="let product of fruitsAndVegetablesList$ | async" class="col">
-                <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
+                <a routerLink="/product/{{product.id}}" class="text-decoration-none text-inherit">
                     <div class="card card-product">
                         <div class="card-body">
                             <div class="text-center position-relative">
@@ -55,7 +55,7 @@
         </div>
         <div class="row g-4 row-cols-lg-6 row-cols-2 row-cols-md-3">
             <div *ngFor="let product of snacksAndMunchiesList$ | async" class="col">
-                <a routerLink="categories/{{product.categoryId}}" class="text-decoration-none text-inherit">
+                <a routerLink="/product/{{product.id}}" class="text-decoration-none text-inherit">
                     <div class="card card-product">
                         <div class="card-body">
                             <div class="text-center position-relative">
