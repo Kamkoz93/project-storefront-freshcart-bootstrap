@@ -1,8 +1,8 @@
 <section id="storeDetails" class="my-lg-14 my-8">
     <div class="container" *ngIf="stores$ | async as store">
-        <div class="d-flex justify-content-between">
+        <div class="d-flex flex-column d-lg-flex flex-lg-row justify-content-between">
             <ng-container>
-                <div class="d-flex flex-column">
+                <div class="d-flex p-5 card card-product flex-column mb-md-5">
                     <div>
                         <!-- img -->
                         <img [src]="store.logoUrl" [alt]="store" class="rounded-circle icon-shape icon-xxl">
@@ -19,11 +19,12 @@
             </ng-container>
             <ng-container>
                 <!-- card -->
-                <div class="card mb-4 bg-light border-0 d-flex flex-row">
+                <div class="card p-5 bg-light border-0 d-flex flex-column d-lg-flex flex-lg-row mb-md-5">
                     <!-- card body -->
-                    <div class="card-body p-9">
+                    <div class="card-body w-100 p-md-0">
                         <h6 class="mb-0">{{store.name}}</h6>
-                        <div class="small text-muted"> <span>Whatever the ocasion, we've got you covered.</span> </div>
+                        <div class="small text-muted mb-3"> <span>Whatever the ocasion, we've got you covered.</span>
+                        </div>
                         <div class="input-group">
                             <input [formControl]="searchProdInStore" type="text" aria-label="Last name"
                                 class="form-control w-45" placeholder="Search {{store.name}}">
@@ -38,7 +39,8 @@
                         </div>
 
                     </div>
-                    <div><img src="/assets/images/svg-graphics/store-graphics.svg" /></div>
+                    <div class="w-100 d-flex"><img class="img-fluid"
+                            src="/assets/images/svg-graphics/store-graphics.svg" /></div>
                 </div>
             </ng-container>
         </div>
@@ -48,8 +50,8 @@
                     <h3>{{store.name}} products:</h3>
                 </div>
             </div>
-            <div class="row">
-                <div *ngFor="let product of storeProducts" class="col-2">
+            <div class="row g-4 row-cols-lg-6 row-cols-2 row-cols-md-3">
+                <div *ngFor="let product of storeProducts" class="col">
                     <a routerLink="/" class="text-decoration-none text-inherit">
 
                         <div class="card card-product mb-5">
