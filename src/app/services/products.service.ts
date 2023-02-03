@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ProductModel } from '../models/product.model';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ProductWithRatingOptionsQueryModel } from '../query-models/product-with-rating-options.query-model';
 import { ProductDetailsQueryModel } from '../query-models/product-details.query-model';
 
