@@ -4,8 +4,8 @@ import {
   OnInit,
   ViewEncapsulation,
 } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import {
   BehaviorSubject,
   Observable,
@@ -13,19 +13,21 @@ import {
   map,
   of,
   shareReplay,
-  switchMap,
-  tap,
   startWith,
+  switchMap,
   take,
+  tap,
 } from 'rxjs';
-import { ProductWithRatingOptionsQueryModel } from 'src/app/query-models/product-with-rating-options.query-model';
-import { ProductsService } from 'src/app/services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { ProductsService } from '../../services/products.service';
 import { StoresService } from '../../services/stores.service';
+import { ShoppingCartService } from '../../services/shopping-cart.service';
 import { ProductCategoryModel } from '../../models/products-category.model';
+import { ProductWithRatingOptionsQueryModel } from '../../query-models/product-with-rating-options.query-model';
 import { PaginationDataModel } from '../../models/pagination-data.model';
+import { FilterModel } from '../../models/filter.model';
 import { StoreModel } from '../../models/store.model';
-import { FilterModel } from 'src/app/models/filter.model';
+import { ProductInBasketQueryModel } from '../../query-models/product-in-basket.query-model';
 
 @Component({
   selector: 'app-category-products',
@@ -40,7 +42,8 @@ export class CategoryProductsComponent implements OnInit {
     private _activatedRoute: ActivatedRoute,
     private _router: Router,
     private _productsService: ProductsService,
-    private _storesService: StoresService
+    private _storesService: StoresService,
+    private _shoppingCartService: ShoppingCartService
   ) {}
 
   readonly categoriesList$: Observable<ProductCategoryModel[]> =
@@ -318,5 +321,50 @@ export class CategoryProductsComponent implements OnInit {
         })
       )
       .subscribe();
+    this._shoppingCartService.loadCart();
+    this.productsInBasket = this._shoppingCartService.getProduct();
+  }
+
+  public productsInBasket: ProductInBasketQueryModel[] = [];
+  public subTotal!: number;
+
+  // ngOnInit() {
+  // this._shoppingCartService.loadCart();
+  // this.productsInBasket = this._shoppingCartService.getProduct();
+  // }
+
+  //Add product to Cart
+  addToCart(product: ProductInBasketQueryModel) {
+    if (!this._shoppingCartService.productInCart(product)) {
+      product.quantity = 1;
+      this._shoppingCartService.addToCart(product);
+      this.productsInBasket = [...this._shoppingCartService.getProduct()];
+      this.subTotal = product.price;
+    }
+  }
+
+  //Remove a Product from Cart
+  removeFromCart(product: ProductInBasketQueryModel) {
+    this._shoppingCartService.removeProduct(product);
+    this.productsInBasket = this._shoppingCartService.getProduct();
+  }
+
+  //Calculate Total
+
+  get total() {
+    return this.productsInBasket?.reduce(
+      (sum, product) => ({
+        quantity: 1,
+        price: !product.quantity
+          ? sum.price
+          : sum.price + product.quantity * product.price,
+      }),
+      { quantity: 1, price: 0 }
+    ).price;
+  }
+
+  checkout() {
+    localStorage.setItem('cart_total', JSON.stringify(this.total));
+    this._router.navigate(['/payment']);
   }
 }

@@ -9,4 +9,5 @@ export interface ProductWithRatingOptionsQueryModel {
   readonly featureValue: number;
   readonly storeIds: string[];
   readonly id: string;
+  quantity: number;
 }

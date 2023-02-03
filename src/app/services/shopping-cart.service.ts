@@ -6,7 +6,7 @@ import { ProductInBasketQueryModel } from '../query-models/product-in-basket.que
 @Injectable({
   providedIn: 'root',
 })
-export class ProductService {
+export class ShoppingCartService {
   public productsInBasket: ProductInBasketQueryModel[] = [];
 
   constructor(private _httpClient: HttpClient) {}

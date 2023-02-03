@@ -6,7 +6,7 @@ import {
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ProductInBasketQueryModel } from 'src/app/query-models/product-in-basket.query-model';
-import { ProductService } from '../../services/shopping-cart.service';
+import { ShoppingCartService } from '../../services/shopping-cart.service';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -16,35 +16,34 @@ import { ProductService } from '../../services/shopping-cart.service';
 })
 export class ShoppingCartComponent {
   constructor(
-    private _productsService: ProductService,
+    private _shoppingCartService: ShoppingCartService,
     private _router: Router
   ) {}
 
-  readonly productList$: Observable<ProductInBasketQueryModel[]> =
-    this._productsService.getAllProducts();
+  readonly productList$!: Observable<ProductInBasketQueryModel[]>;
 
   public productsInBasket: ProductInBasketQueryModel[] = [];
   public subTotal!: number;
 
   ngOnInit() {
-    this._productsService.loadCart();
-    this.productsInBasket = this._productsService.getProduct();
+    this._shoppingCartService.loadCart();
+    this.productsInBasket = this._shoppingCartService.getProduct();
   }
 
   //Add product to Cart
   addToCart(product: ProductInBasketQueryModel) {
-    if (!this._productsService.productInCart(product)) {
+    if (!this._shoppingCartService.productInCart(product)) {
       product.quantity = 1;
-      this._productsService.addToCart(product);
-      this.productsInBasket = [...this._productsService.getProduct()];
+      this._shoppingCartService.addToCart(product);
+      this.productsInBasket = [...this._shoppingCartService.getProduct()];
       this.subTotal = product.price;
     }
   }
 
   //Remove a Product from Cart
   removeFromCart(product: ProductInBasketQueryModel) {
-    this._productsService.removeProduct(product);
-    this.productsInBasket = this._productsService.getProduct();
+    this._shoppingCartService.removeProduct(product);
+    this.productsInBasket = this._shoppingCartService.getProduct();
   }
 
   //Calculate Total
