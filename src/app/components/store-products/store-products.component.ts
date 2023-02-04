@@ -5,21 +5,23 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { FormControl } from '@angular/forms';
 import {
   Observable,
+  combineLatest,
   map,
   shareReplay,
+  startWith,
   switchMap,
   take,
   tap,
-  combineLatest,
-  startWith,
 } from 'rxjs';
 import { StoresService } from '../../services/stores.service';
 import { ProductsService } from '../../services/products.service';
+import { ShoppingCartService } from '../../services/shopping-cart.service';
 import { ProductModel } from '../../models/product.model';
 import { StoreModel } from '../../models/store.model';
-import { FormControl } from '@angular/forms';
+import { ProductInBasketQueryModel } from '../../query-models/product-in-basket.query-model';
 
 @Component({
   selector: 'app-store-products',
@@ -33,7 +35,8 @@ export class StoreProductsComponent implements OnInit {
     private _storesService: StoresService,
     private _activatedRoute: ActivatedRoute,
     private _productsService: ProductsService,
-    private _router: Router
+    private _router: Router,
+    private _shoppingCartService: ShoppingCartService
   ) {}
 
   readonly pageParams$: Observable<Params> = this._activatedRoute.params.pipe(
@@ -43,20 +46,21 @@ export class StoreProductsComponent implements OnInit {
     shareReplay(1)
   );
 
-  readonly storeProducts$: Observable<ProductModel[]> = this.pageParams$.pipe(
-    switchMap((queryParams) => {
-      return this._productsService
-        .getAllProducts()
-        .pipe(
-          map((products) =>
-            products.filter(
-              (product) =>
-                product.storeIds.indexOf(queryParams['storeId']) !== -1
+  readonly storeProducts$: Observable<ProductInBasketQueryModel[]> =
+    this.pageParams$.pipe(
+      switchMap((queryParams) => {
+        return this._productsService
+          .getAllProducts()
+          .pipe(
+            map((products) =>
+              products.filter(
+                (product) =>
+                  product.storeIds.indexOf(queryParams['storeId']) !== -1
+              )
             )
-          )
-        );
-    })
-  );
+          );
+      })
+    );
 
   readonly stores$: Observable<StoreModel> = this.pageParams$.pipe(
     switchMap((params) => this._storesService.getStoreById(params['storeId'])),
@@ -68,18 +72,16 @@ export class StoreProductsComponent implements OnInit {
   readonly searchedTerm$: Observable<string> =
     this.searchProdInStore.valueChanges.pipe(startWith(''));
 
-  readonly filteredStoreProds$: Observable<ProductModel[]> = combineLatest([
-    this.storeProducts$,
-    this.searchedTerm$,
-  ]).pipe(
-    map(([products, search]) =>
-      products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.price.toString().includes(search.toLowerCase())
+  readonly filteredStoreProds$: Observable<ProductInBasketQueryModel[]> =
+    combineLatest([this.storeProducts$, this.searchedTerm$]).pipe(
+      map(([products, search]) =>
+        products.filter(
+          (product) =>
+            product.name.toLowerCase().includes(search.toLowerCase()) ||
+            product.price.toString().includes(search.toLowerCase())
+        )
       )
-    )
-  );
+    );
 
   ngOnInit() {
     this.pageParams$
@@ -90,5 +92,17 @@ export class StoreProductsComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  public productsInBasket: ProductInBasketQueryModel[] = [];
+  public subTotal!: number;
+
+  addToCart(product: ProductInBasketQueryModel) {
+    if (!this._shoppingCartService.productInCart(product)) {
+      product.quantity = 1;
+      this._shoppingCartService.addToCart(product);
+      this.productsInBasket = [...this._shoppingCartService.getProduct()];
+      this.subTotal = product.price;
+    }
   }
 }

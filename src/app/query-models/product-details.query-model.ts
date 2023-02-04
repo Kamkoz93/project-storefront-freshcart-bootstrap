@@ -13,4 +13,5 @@ export interface ProductDetailsQueryModel {
   readonly id: string;
   readonly categoryName: string;
   readonly similarProducts: ProductWithRatingOptionsQueryModel[];
+  quantity: number;
 }
