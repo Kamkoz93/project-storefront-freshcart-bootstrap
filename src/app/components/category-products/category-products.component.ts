@@ -328,12 +328,6 @@ export class CategoryProductsComponent implements OnInit {
   public productsInBasket: ProductInBasketQueryModel[] = [];
   public subTotal!: number;
 
-  // ngOnInit() {
-  // this._shoppingCartService.loadCart();
-  // this.productsInBasket = this._shoppingCartService.getProduct();
-  // }
-
-  //Add product to Cart
   addToCart(product: ProductInBasketQueryModel) {
     if (!this._shoppingCartService.productInCart(product)) {
       product.quantity = 1;
@@ -343,13 +337,10 @@ export class CategoryProductsComponent implements OnInit {
     }
   }
 
-  //Remove a Product from Cart
   removeFromCart(product: ProductInBasketQueryModel) {
     this._shoppingCartService.removeProduct(product);
     this.productsInBasket = this._shoppingCartService.getProduct();
   }
-
-  //Calculate Total
 
   get total() {
     return this.productsInBasket?.reduce(
@@ -361,10 +352,5 @@ export class CategoryProductsComponent implements OnInit {
       }),
       { quantity: 1, price: 0 }
     ).price;
-  }
-
-  checkout() {
-    localStorage.setItem('cart_total', JSON.stringify(this.total));
-    this._router.navigate(['/payment']);
   }
 }
