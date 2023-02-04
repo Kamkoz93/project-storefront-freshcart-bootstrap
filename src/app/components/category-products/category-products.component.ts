@@ -321,8 +321,6 @@ export class CategoryProductsComponent implements OnInit {
         })
       )
       .subscribe();
-    this._shoppingCartService.loadCart();
-    this.productsInBasket = this._shoppingCartService.getProduct();
   }
 
   public productsInBasket: ProductInBasketQueryModel[] = [];
@@ -335,22 +333,5 @@ export class CategoryProductsComponent implements OnInit {
       this.productsInBasket = [...this._shoppingCartService.getProduct()];
       this.subTotal = product.price;
     }
-  }
-
-  removeFromCart(product: ProductInBasketQueryModel) {
-    this._shoppingCartService.removeProduct(product);
-    this.productsInBasket = this._shoppingCartService.getProduct();
-  }
-
-  get total() {
-    return this.productsInBasket?.reduce(
-      (sum, product) => ({
-        quantity: 1,
-        price: !product.quantity
-          ? sum.price
-          : sum.price + product.quantity * product.price,
-      }),
-      { quantity: 1, price: 0 }
-    ).price;
   }
 }
