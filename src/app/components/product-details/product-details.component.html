@@ -55,12 +55,13 @@
                         <div>
 
 
-                            <!-- input -->
-                            <div class="input-group input-spinner  ">
-                                <input type="button" value="-" class="button-minus  btn  btn-sm " data-field="quantity">
-                                <input type="number" step="1" max="10" value="1" name="quantity"
-                                    class="quantity-field form-control-sm form-input   ">
-                                <input type="button" value="+" class="button-plus btn btn-sm " data-field="quantity">
+                            <div class="col-3 col-md-3 col-lg-2">
+                                <!-- input -->
+                                <div class="text-center">
+                                    <input [(ngModel)]="product.quantity" [ngModelOptions]="{standalone: true}" min="1"
+                                        type="number" value="1" class="form-control w-80 mb-1" />
+                                    <span><small class="text-muted">Quantity</small></span>
+                                </div>
                             </div>
 
                         </div>
@@ -68,8 +69,8 @@
 
                             <div class="col-xxl-4 col-lg-4 col-md-5 col-5 d-grid">
                                 <!-- button -->
-                                <!-- btn --> <button type="button" class="btn btn-primary"><i
-                                        class="feather-icon icon-shopping-bag me-2"></i>Add to
+                                <!-- btn --> <button (click)="addToCart(product)" type="button"
+                                    class="btn btn-primary"><i class="feather-icon icon-shopping-bag me-2"></i>Add to
                                     cart</button>
                             </div>
                             <div class="col-md-4 col-4">
@@ -180,17 +181,16 @@
                         </div>
                         <!-- price -->
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div><span class="text-dark">{{similarProd.price | currency}}</span> <span
-                                    class="text-decoration-line-through text-muted">$24</span>
+                            <div><span class="text-dark">{{similarProd.price | currency}}</span>
                             </div>
                             <!-- btn -->
-                            <div><a href="#!" class="btn btn-primary btn-sm">
+                            <div><a (click)="addToCart(similarProd)" class="btn btn-primary btn-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round" class="feather feather-plus">
                                         <line x1="12" y1="5" x2="12" y2="19"></line>
                                         <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg> Add</a></div>
+                                    </svg>Add</a></div>
                         </div>
                     </div>
                 </div>

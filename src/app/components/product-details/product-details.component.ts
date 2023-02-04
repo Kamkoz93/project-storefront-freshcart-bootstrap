@@ -11,6 +11,8 @@ import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
 import { ProductDetailsQueryModel } from '../../query-models/product-details.query-model';
 import { ProductCategoryModel } from '../../models/products-category.model';
+import { ProductInBasketQueryModel } from 'src/app/query-models/product-in-basket.query-model';
+import { ShoppingCartService } from 'src/app/services/shopping-cart.service';
 
 @Component({
   selector: 'app-product-details',
@@ -22,7 +24,8 @@ export class ProductDetailsComponent {
   constructor(
     private _productsService: ProductsService,
     private _activatedRoute: ActivatedRoute,
-    private _categoriesService: CategoriesService
+    private _categoriesService: CategoriesService,
+    private _shoppingCartService: ShoppingCartService
   ) {}
 
   readonly product$: Observable<ProductDetailsQueryModel> =
@@ -88,4 +91,16 @@ export class ProductDetailsComponent {
         };
       })
     );
+
+  public productsInBasket: ProductInBasketQueryModel[] = [];
+  public subTotal!: number;
+
+  addToCart(product: ProductInBasketQueryModel) {
+    if (!this._shoppingCartService.productInCart(product)) {
+      product.quantity = product.quantity ? product.quantity : 1;
+      this._shoppingCartService.addToCart(product);
+      this.productsInBasket = [...this._shoppingCartService.getProduct()];
+      this.subTotal = product.price;
+    }
+  }
 }
