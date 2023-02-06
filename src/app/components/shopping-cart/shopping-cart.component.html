@@ -14,6 +14,12 @@
         <!-- row -->
         <div class="row">
             <div class="col-lg-8 col-md-7">
+                <ng-container *ngIf="productsInBasket.length == 0">There are no products in your
+                    basket...
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/" class="btn btn-primary">Continue Shopping</a>
+                    </div>
+                </ng-container>
                 <div class="py-3" *ngFor="let product of productsInBasket; last as isLast">
                     <ul class="list-group list-group-flush">
                         <!-- list group -->
@@ -67,7 +73,7 @@
                     <ng-container *ngIf="isLast">
                         <!-- btn -->
                         <div class="d-flex justify-content-between mt-4">
-                            <a href="/categories" class="btn btn-primary">Continue Shopping</a>
+                            <a href="/" class="btn btn-primary">Continue Shopping</a>
                             <a href="/" class="btn btn-dark">Update Cart</a>
                         </div>
                     </ng-container>
