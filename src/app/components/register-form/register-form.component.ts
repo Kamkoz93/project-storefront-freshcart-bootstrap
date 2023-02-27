@@ -10,10 +10,12 @@ import {
   dateValidator,
   passwordMatchValidator,
 } from '../helpers/helpers.component';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register-form',
   templateUrl: './register-form.component.html',
+  styleUrls: ['./register-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,7 +53,8 @@ export class RegisterFormComponent {
 
   constructor(
     private _registerUserService: RegisterUserService,
-    private _router: Router
+    private _router: Router,
+    private _dialogRef: MatDialogRef<RegisterFormComponent>
   ) {}
 
   onRegisterFormSubmitted(registerForm: FormGroup): void {
@@ -69,5 +72,9 @@ export class RegisterFormComponent {
           },
         });
     }
+  }
+
+  closeModal(): void {
+    this._dialogRef.close();
   }
 }

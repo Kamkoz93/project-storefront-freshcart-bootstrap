@@ -8,6 +8,8 @@ import { StoresService } from 'src/app/services/stores.service';
 import { Observable, shareReplay } from 'rxjs';
 import { ProductCategoryModel } from 'src/app/models/products-category.model';
 import { StoreModel } from 'src/app/models/store.model';
+import { MatDialog } from '@angular/material/dialog';
+import { RegisterFormComponent } from '../register-form/register-form.component';
 
 @Component({
   selector: 'app-header',
@@ -20,8 +22,13 @@ export class HeaderComponent {
   readonly categories$: Observable<ProductCategoryModel[]> =
     this._productCategoriesService.getAllCategories();
 
+  openRegisterModal(): void {
+    this._dialog.open(RegisterFormComponent, {});
+  }
+
   constructor(
     private _productCategoriesService: CategoriesService,
-    private _storesService: StoresService
+    private _storesService: StoresService,
+    private _dialog: MatDialog
   ) {}
 }
