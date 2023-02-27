@@ -7,3 +7,9 @@
 .cdk-overlay-pane {
   pointer-events: none !important;
 }
+.modal-close {
+  float: right;
+  padding: 15px;
+  z-index: 1000;
+  position: relative;
+}

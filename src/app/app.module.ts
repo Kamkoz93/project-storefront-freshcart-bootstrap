@@ -9,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { HeaderComponentModule } from './components/header/header.component-module';
 import { FooterComponentModule } from './components/footer/footer.component-module';
+import { TOKEN_STORAGE } from './services/tokenStorage';
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,7 +24,7 @@ import { FooterComponentModule } from './components/footer/footer.component-modu
     HeaderComponentModule,
     FooterComponentModule,
   ],
-  providers: [],
+  providers: [{ provide: TOKEN_STORAGE, useValue: localStorage }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

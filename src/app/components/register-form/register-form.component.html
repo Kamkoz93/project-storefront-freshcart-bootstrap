@@ -128,16 +128,12 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <!-- <button type="button" (click)="closeModal()" class="btn-close" data-bs-dismiss="modal"
-                aria-label="Close"></button> -->
             <mat-tab-group>
-                <mat-tab label="Register Account">
+                <mat-tab label="Log in">
+                    <button type="button" (click)="closeModal()" class="btn-close modal-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                     <div class="modal-body">
-                        <!-- <div class="modal-header">
-                            <button type="button" (click)="closeModal()" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div> -->
-                        <form [formGroup]="registerForm">
+                        <form [formGroup]="loginForm">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email address</label>
                                 <input type="email" class="form-control" id="email" formControlName="email"
@@ -174,93 +170,17 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="mb-">
-                                <label for="ConfirmPassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="confirmPassword"
-                                    formControlName="confirmPassword" placeholder="Repeat Password" required>
-                            </div>
-
-                            <form class="dateOfBirth-form" formGroupName="dob">
-                                <div class="mb-3">
-                                    <label for="day" class="form-label">Day</label>
-                                    <input type="number" class="form-control" id="day" formControlName="day"
-                                        placeholder="Enter Day of your birth" required>
-                                    <div class="alert alert-danger d-flex align-items-center"
-                                        *ngIf="registerForm.get('dob.day')!.invalid && (registerForm.get('dob.day')!.dirty || registerForm.get('dob.day')!.touched)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            fill="currentColor" class="bi bi-exclamation-triangle-fill me-2"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z">
-                                            </path>
-                                        </svg>
-                                        <div>
-                                            Day is invalid
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="month" class="form-label">Month</label>
-                                    <input type="number" class="form-control" id="month" formControlName="month"
-                                        placeholder="Enter Month of your birth" required>
-                                    <div class="alert alert-danger d-flex align-items-center"
-                                        *ngIf="registerForm.get('dob.month')!.invalid && (registerForm.get('dob.month')!.dirty || registerForm.get('dob.month')!.touched)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            fill="currentColor" class="bi bi-exclamation-triangle-fill me-2"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z">
-                                            </path>
-                                        </svg>
-                                        <div>
-                                            Month is invalid
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="year" class="form-label">Year</label>
-                                    <input type="number" class="form-control" id="year" formControlName="year"
-                                        placeholder="Enter Year of your birth" required>
-                                    <div class="alert alert-danger d-flex align-items-center"
-                                        *ngIf="registerForm.get('dob.year')!.invalid && (registerForm.get('dob.year')!.dirty || registerForm.get('dob.year')!.touched)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            fill="currentColor" class="bi bi-exclamation-triangle-fill me-2"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z">
-                                            </path>
-                                        </svg>
-                                        <div>
-                                            Year is invalid
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="form-text">By Signup, you agree to our <a href="#!">Terms of Service</a>
-                                    &amp; <a href="#!">Privacy Policy</a></small>
-                            </form>
-                            <div class="alert alert-danger" *ngIf=" registerForm.hasError('passwordMatchValidator')">
+                            <div class="alert alert-danger" *ngIf=" loginForm.hasError('passwordMatchValidator')">
                                 Passwords do not match
                             </div>
-                            <div class="alert alert-danger" *ngIf="registerForm.hasError('dateValidator')">
-                                {{registerForm.getError('dateValidator')}}
-                            </div>
-                            <button type="button" class="btn btn-primary"
-                                (click)="onRegisterFormSubmitted(registerForm)">Sign
-                                Up</button>
+                            <button type="button" class="btn btn-primary" (click)="onLoginFormSubmitted(loginForm)">Log
+                                In</button>
                         </form>
-                    </div>
-                    <div class="modal-footer border-0 justify-content-center">
-                        Already have an account? <a href="/login">Sign in</a>
                     </div>
                 </mat-tab>
-                <mat-tab label="Log in">
-                    <!-- <div class="modal-header">
-                        <button type="button" (click)="closeModal()" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div> -->
+                <mat-tab label="Register Account">
+                    <button type="button" (click)="closeModal()" class="btn-close modal-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                     <div class="modal-body">
                         <form [formGroup]="registerForm">
                             <div class="mb-3">
@@ -376,9 +296,6 @@
                                 (click)="onRegisterFormSubmitted(registerForm)">Sign
                                 Up</button>
                         </form>
-                    </div>
-                    <div class="modal-footer border-0 justify-content-center">
-                        Already have an account? <a href="/login">Sign in</a>
                     </div>
                 </mat-tab>
             </mat-tab-group>

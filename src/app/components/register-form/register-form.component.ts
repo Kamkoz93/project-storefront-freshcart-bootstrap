@@ -57,6 +57,24 @@ export class RegisterFormComponent {
     private _dialogRef: MatDialogRef<RegisterFormComponent>
   ) {}
 
+  readonly loginForm: FormGroup = new FormGroup({
+    email: new FormControl('', [Validators.email, Validators.required]),
+    password: new FormControl('', Validators.required),
+  });
+
+  onLoginFormSubmitted(loginForm: FormGroup): void {
+    this._registerUserService
+      .loginUser(
+        loginForm.get('email')?.value,
+        loginForm.get('password')?.value
+      )
+      .subscribe({
+        next: () => {
+          this._router.navigate(['/']);
+        },
+      });
+  }
+
   onRegisterFormSubmitted(registerForm: FormGroup): void {
     if (registerForm.valid) {
       this._registerUserService
