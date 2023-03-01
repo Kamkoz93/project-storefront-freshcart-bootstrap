@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { CategoriesService } from 'src/app/services/categories.service';
 import { StoresService } from 'src/app/services/stores.service';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ProductCategoryModel } from 'src/app/models/products-category.model';
 import { MatDialog } from '@angular/material/dialog';
 import { RegisterFormComponent } from '../register-form/register-form.component';
