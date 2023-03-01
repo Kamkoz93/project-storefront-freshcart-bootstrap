@@ -133,13 +133,13 @@
                     <button type="button" (click)="closeModal()" class="btn-close modal-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                     <div class="modal-body">
-                        <form [formGroup]="loginForm">
+                        <form [formGroup]="loginForm" (ngSubmit)="onLoginFormSubmitted(loginForm)">
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email address</label>
-                                <input type="email" class="form-control" id="email" formControlName="email"
-                                    placeholder="Enter Email address" required>
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" placeholder="enter your email"
+                                    formControlName="email" required>
                                 <div class="alert alert-danger d-flex align-items-center"
-                                    *ngIf="registerForm.get('email')!.invalid && (registerForm.get('email')!.dirty || registerForm.get('email')!.touched)">
+                                    *ngIf="loginForm.get('email')!.invalid && (loginForm.get('email')!.dirty || loginForm.get('email')!.touched)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                         class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
                                         <path
@@ -152,13 +152,12 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" formControlName="password"
-                                    placeholder="Enter Password" required>
+                                <input class="form-control" id="password" formControlName="password" type="password"
+                                    placeholder="enter password" required>
                                 <div class="alert alert-danger d-flex align-items-center"
-                                    *ngIf="registerForm.get('password')!.invalid && (registerForm.get('password')!.dirty || registerForm.get('password')!.touched)">
+                                    *ngIf="loginForm.get('password')!.invalid && (loginForm.get('password')!.dirty || loginForm.get('password')!.touched)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                         class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
                                         <path
@@ -169,12 +168,13 @@
                                         Password is invalid
                                     </div>
                                 </div>
+
                             </div>
-                            <div class="alert alert-danger" *ngIf=" loginForm.hasError('passwordMatchValidator')">
-                                Passwords do not match
+                            <div class="alert alert-danger d-flex align-items-center"
+                                *ngIf="loginForm.hasError('beVal')">{{loginForm.getError('beVal')}}</div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">Log in</button>
                             </div>
-                            <button type="button" class="btn btn-primary" (click)="onLoginFormSubmitted(loginForm)">Log
-                                In</button>
                         </form>
                     </div>
                 </mat-tab>
@@ -207,7 +207,7 @@
                                 <input type="password" class="form-control" id="password" formControlName="password"
                                     placeholder="Enter Password" required>
                                 <div class="alert alert-danger d-flex align-items-center"
-                                    *ngIf="registerForm.get('password')!.invalid && (registerForm.get('password')!.dirty || registerForm.get('password')!.touched)">
+                                    *ngIf="registerForm.get('password')?.hasError('passwordValidator') && (registerForm.get('password')!.dirty || registerForm.get('password')!.touched)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                         class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
                                         <path
@@ -215,7 +215,7 @@
                                         </path>
                                     </svg>
                                     <div>
-                                        Password is invalid
+                                        {{ registerForm.get('password')?.getError('passwordValidator') }}
                                     </div>
                                 </div>
                             </div>
@@ -292,6 +292,11 @@
                             <div class="alert alert-danger" *ngIf="registerForm.hasError('dateValidator')">
                                 {{registerForm.getError('dateValidator')}}
                             </div>
+                            <div class="alert alert-danger d-flex align-items-center"
+                                *ngIf="registerForm.hasError('beVal')">{{registerForm.getError('beVal')}}
+                            </div>
+
+
                             <button type="button" class="btn btn-primary"
                                 (click)="onRegisterFormSubmitted(registerForm)">Sign
                                 Up</button>

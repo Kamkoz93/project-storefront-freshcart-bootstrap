@@ -13,6 +13,45 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 })
 export class HelpersComponent {}
 
+export const passwordValidator: ValidatorFn = (
+  control: AbstractControl
+): ValidationErrors | null => {
+  const password = control?.value;
+
+  if (!password) return null;
+
+  if (/[A-Z]/.test(password) === false) {
+    return {
+      passwordValidator: 'Password must cointain at least one capital case',
+    };
+  }
+  if (/[a-z]/.test(password) === false) {
+    return {
+      passwordValidator: 'Password must cointain at least one lower case',
+    };
+  }
+  if (/[0-9]/.test(password) === false) {
+    return {
+      passwordValidator: 'Password must cointain at least one number',
+    };
+  }
+
+  if (/[!@#$%^*()]/.test(password) === false) {
+    return {
+      passwordValidator:
+        'Password must cointain at least one special character !@#$%^*()',
+    };
+  }
+
+  if (/^.{6,}$/.test(password) === false) {
+    return {
+      passwordValidator: 'Password must have at least 6 characters',
+    };
+  }
+
+  return null;
+};
+
 export const passwordMatchValidator: ValidatorFn = (
   control: AbstractControl
 ): ValidationErrors | null => {

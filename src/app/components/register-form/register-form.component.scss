@@ -13,3 +13,7 @@
   z-index: 1000;
   position: relative;
 }
+.modal-content {
+  max-height: 80vh;
+  overflow-y: auto;
+}

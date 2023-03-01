@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ViewEncapsulation,
 } from '@angular/core';
@@ -9,8 +10,10 @@ import { RegisterUserService } from '../../services/register-user.service';
 import {
   dateValidator,
   passwordMatchValidator,
+  passwordValidator,
 } from '../helpers/helpers.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register-form',
@@ -20,15 +23,16 @@ import { MatDialogRef } from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
+  constructor(
+    private _registerUserService: RegisterUserService,
+    private _router: Router,
+    private _dialogRef: MatDialogRef<RegisterFormComponent>,
+    private cd: ChangeDetectorRef
+  ) {}
   readonly registerForm: FormGroup = new FormGroup(
     {
       email: new FormControl('', [Validators.email, Validators.required]),
-      password: new FormControl('', [
-        Validators.pattern(
-          /^(?=.*[0-9])(?=.*[!@#$%^*()])(?=.*[A-Z])(?=.*[a-z]).{6,}$/
-        ),
-        Validators.required,
-      ]),
+      password: new FormControl('', [passwordValidator, Validators.required]),
       confirmPassword: new FormControl(''),
       dob: new FormGroup({
         day: new FormControl('', [
@@ -51,12 +55,6 @@ export class RegisterFormComponent {
     { validators: [passwordMatchValidator, dateValidator] }
   );
 
-  constructor(
-    private _registerUserService: RegisterUserService,
-    private _router: Router,
-    private _dialogRef: MatDialogRef<RegisterFormComponent>
-  ) {}
-
   readonly loginForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.email, Validators.required]),
     password: new FormControl('', Validators.required),
@@ -71,6 +69,12 @@ export class RegisterFormComponent {
       .subscribe({
         next: () => {
           this._router.navigate(['/']);
+        },
+        error: (err: HttpErrorResponse) => {
+          loginForm.setErrors({
+            beVal: err.error.message,
+          });
+          this.cd.markForCheck();
         },
       });
   }
@@ -87,6 +91,12 @@ export class RegisterFormComponent {
         .subscribe({
           next: () => {
             this._router.navigate(['/']);
+          },
+          error: (err: HttpErrorResponse) => {
+            registerForm.setErrors({
+              beVal: err.error.message,
+            });
+            this.cd.markForCheck();
           },
         });
     }
