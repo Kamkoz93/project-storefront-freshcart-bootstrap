@@ -2,6 +2,10 @@
 
 It is a ongoing project of e-commerce with groceries based on Bootstrap theme with use of variety of elements.
 
+# Demo
+
+https://project-storefront-freshcart-bootstrap.vercel.app/
+
 ## Technologies used
 
 * Angular
