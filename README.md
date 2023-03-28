@@ -1,4 +1,7 @@
 # StoreFront E-Grocery Store
+<div id="header" align="center">
+  <img src="https://media.giphy.com/media/M9gbBd9nbDrOTu1Mqx/giphy.gif" width="100"/>
+</div>
 
 It is a ongoing project of e-commerce with groceries based on Bootstrap theme with use of variety of elements.
 
